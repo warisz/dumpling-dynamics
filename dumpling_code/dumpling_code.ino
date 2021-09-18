@@ -37,12 +37,12 @@ int _speed = 1;
 #define PUSHER_LEFT_MIN 30
 #define PUSHER_LEFT_MAX 150
 
-#define PUSHER_RIGHT_MIN 30
-#define PUSHER_RIGHT_MAX 150
+#define PUSHER_RIGHT_MIN 150
+#define PUSHER_RIGHT_MAX 30
 
-#define PUSHER_CUTTER_MIN 40
-#define PUSHER_CUTTER_SHAKE_OFFSET -10
-#define PUSHER_CUTTER_MAX 140
+#define PUSHER_CUTTER_MIN 140
+#define PUSHER_CUTTER_SHAKE_OFFSET 30
+#define PUSHER_CUTTER_MAX 25
 
 bool leftLatchEngaged = true;
 
@@ -129,6 +129,9 @@ void setup() {
   pinMode(Pin2, OUTPUT);//Set digital 10 port mode, the OUTPUT for the output
   pinMode(Pin3, OUTPUT);//Set digital 11 port mode, the OUTPUT for the output
   Serial.begin(9600);
+  cutterServo.write(PUSHER_CUTTER_MAX);
+    leftLatchServo.write(PUSHER_LEFT_MAX);
+    rightLatchServo.write(PUSHER_RIGHT_MAX);
 }
 
 void dropLeftLatch(){
@@ -177,9 +180,9 @@ void fillDumpling() {
   for(int i = 0; i < 4; i++)
   {
     cutterServo.write(PUSHER_CUTTER_MAX + PUSHER_CUTTER_SHAKE_OFFSET);
-    delay(30);
+    delay(100);
     cutterServo.write(PUSHER_CUTTER_MAX);
-    delay(30);
+    delay(100);
   }
 }
 
@@ -204,10 +207,9 @@ void loop() {
   if(Serial.available())
   {
     Serial.read();
-    rotateTable();
+    //rotateTable();
     Serial.write("turning");
-    cutterServo.write(PUSHER_CUTTER_MAX);
-    leftLatchServo.write(PUSHER_LEFT_MAX);
+    fillDumpling();
     
   }
 }
