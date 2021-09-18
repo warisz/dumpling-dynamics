@@ -1,10 +1,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import serial
 
-
 class Ui_DumplingBot9000(object):
     def setupUi(self, DumplingBot9000):
-        self.ser = serial.Serial('/COM3', baudrate = 9600, timeout= 0.25)
+        self.ser = serial.Serial('/COM5', baudrate = 9600, timeout= 0.25)
 
         DumplingBot9000.setObjectName("DumplingBot9000")
         DumplingBot9000.resize(1086, 785)
@@ -66,11 +65,13 @@ class Ui_DumplingBot9000(object):
         self.label.setText(_translate("DumplingBot9000", "TextLabel"))
 
 
-if name == "main":
+if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     DumplingBot9000 = QtWidgets.QMainWindow()
-    ui = UiDumplingBot9000()
+    ui = Ui_DumplingBot9000()
     ui.setupUi(DumplingBot9000)
     DumplingBot9000.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec_())
+
+
