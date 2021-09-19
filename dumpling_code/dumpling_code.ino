@@ -45,6 +45,7 @@ int _speed = 1;
 #define PUSHER_CUTTER_MAX 25
 
 bool leftLatchEngaged = true;
+char data; 
 
 Servo leftLatchServo;
 Servo rightLatchServo;
@@ -204,12 +205,23 @@ void makeDumplings() {
 void loop() {
   // put your main code here, to run repeatedly:
   delay(1);
-  if(Serial.available())
+  if(Serial.available() > 0)
   {
-    Serial.read();
+    data = Serial.read();
     //rotateTable();
-    Serial.write("turning");
-    fillDumpling();
+
+    
+    if(data == 'a'){
+      rotateTable();
+      Serial.write('a');
+
+      
+    }else if(data == 'b'){
+      fillDumpling();
+      Serial.write('b');
+      
+
+    }
     
   }
 }

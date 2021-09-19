@@ -4,7 +4,7 @@ import serial
 
 class Ui_DumplingBot9000(object):
     def setupUi(self, DumplingBot9000):
-        self.ser = serial.Serial('/COM3', baudrate = 9600, timeout= 0.25)
+        self.ser = serial.Serial('/COM5', baudrate = 9600, timeout= 0.25)
 
         DumplingBot9000.setObjectName("DumplingBot9000")
         DumplingBot9000.resize(1086, 785)
