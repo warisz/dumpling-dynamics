@@ -45,6 +45,7 @@ class Ui_DumplingBot9000(object):
     def DumpMeatFunc(self):
         self.ser.write("a".encode())
         print("a")
+        #reset label
         self.label.setText("a")
 
     def MeatCutterFunc(self):
