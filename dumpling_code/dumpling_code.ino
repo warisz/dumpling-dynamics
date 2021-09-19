@@ -2,10 +2,11 @@
 
 #include <Servo.h>
 
-int Pin0 = 9;//definition digital 11 pins as pin to control the IN1 (ULN24L01)
-int Pin1 = 10;//definition digital 10 pins as pin to control the IN2 (ULN24L01)
-int Pin2 = 11;//definition digital 9 pins as pin to control the IN3 (ULN24L01)
-int Pin3 = 12;//definition digital 8 pins as pin to control the IN4 (ULN24L01)
+//for the table
+int Pin0 = 5;//definition digital 11 pins as pin to control the IN1 (ULN24L01)
+int Pin1 = 4;//definition digital 10 pins as pin to control the IN2 (ULN24L01)
+int Pin2 = 3;//definition digital 9 pins as pin to control the IN3 (ULN24L01)
+int Pin3 = 2;//definition digital 8 pins as pin to control the IN4 (ULN24L01)
 
 int _step = 512; 
 int _speed = 1; 
@@ -27,11 +28,33 @@ int _speed = 1;
 #endif
 
 //PINOUTS
-#define PUSHER_LATCH_LEFT_PIN 2
-#define PUSHER_LATCH_RIGHT_PIN 3
-#define PUSHER_CUTTER_PIN 4
+#define PUSHER_LATCH_LEFT_PIN 35
+#define PUSHER_LATCH_RIGHT_PIN 37
+#define PUSHER_CUTTER_PIN 39
 
 #define TURNTABLE_INDEX_PIN 6
+
+//BACK CLAMPER STEPPER PINS
+//pins for the back clamper (closer to meat pusher) 
+int back_1 = 41;//to control the IN1 (ULN24L01)
+int back_2 = 43;//to control the IN2 (ULN24L01)
+int back_3 = 45;//to control the IN3 (ULN24L01)
+int back_4 = 47;//to control the IN4 (ULN24L01)
+
+//FRONT CLAMPER STEPPER PINS
+//pins for the front clamper 
+int front_1 = 46;//to control the IN1 (ULN24L01)
+int front_2 = 48;//to control the IN2 (ULN24L01)
+int front_3 = 50;//to control the IN3 (ULN24L01)
+int front_4 = 52;//to control the IN4 (ULN24L01)
+
+//LADLE CLAMPER STEPPER PINS
+//pins for the ladle
+int ladle_1 = 8;//to control the IN1 (ULN24L01)
+int ladle_2 = 9;//to control the IN2 (ULN24L01)
+int ladle_3 = 10;//to control the IN3 (ULN24L01)
+int ladle_4 = 11;//to control the IN4 (ULN24L01)
+
 
 //SERVO LIMITS
 #define PUSHER_LEFT_MIN 30
@@ -133,7 +156,24 @@ void setup() {
   cutterServo.write(PUSHER_CUTTER_MAX);
     leftLatchServo.write(PUSHER_LEFT_MAX);
     rightLatchServo.write(PUSHER_RIGHT_MAX);
+
+  //initialize back clamp stepper
+  pinMode(back_1, OUTPUT);
+  pinMode(back_2, OUTPUT);
+  pinMode(back_3, OUTPUT);
+  pinMode(back_4, OUTPUT);
+  //initialize front clamp stepper
+  pinMode(front_1, OUTPUT);
+  pinMode(front_2, OUTPUT);
+  pinMode(front_3, OUTPUT);
+  pinMode(front_4, OUTPUT);
+  //initialize ladle stepper
+  pinMode(ladle_1, OUTPUT);
+  pinMode(ladle_2, OUTPUT);
+  pinMode(ladle_3, OUTPUT);
+  pinMode(ladle_4, OUTPUT);
 }
+
 
 void dropLeftLatch(){
   leftLatchServo.write(PUSHER_LEFT_MIN);
@@ -187,11 +227,6 @@ void fillDumpling() {
   }
 }
 
-void clampDumpling() {
-  //move motors up and down
-}
-
-
 
 void makeDumplings() {
   for(int i = 0; i < DUMPLING_COUNT; i++)
@@ -202,26 +237,199 @@ void makeDumplings() {
   }
 }
 
+void clampDumpling() {
+  //move motors up and down
+  moveClampFront(550);
+  moveClampBack(550);
+  delay(1000);
+  moveClampBack(-550);
+  moveClampFront(-550);
+}
+
+//CLAMPER AND LADLE STEPPER MOTOR FUNCTIONS//
+void moveClampFront(int steps)
+{
+  //positive moves stepper up, negative moves down
+  step_front(steps);  
+}
+
+void moveClampBack(int steps)
+{
+  //positive moves stepper up, negative moves down
+  step_back(steps);  
+}
+
+void moveLadle(int steps)
+{
+  //positive unravels, negative pulls 
+  step_ladle(steps);  
+}
+
+void step_front(int _step)//Stepper motor rotation
+{
+  if(_step>=0){  // Stepper motor forward
+    for(int i=0;i<_step;i++){   
+      setStepFront(1, 0, 0, 1);
+      delay(_speed); 
+      setStepFront(1, 0, 0, 0);
+      delay(_speed);
+      setStepFront(1, 1, 0, 0);
+      delay(_speed);
+      setStepFront(0, 1, 0, 0);
+      delay(_speed);
+      setStepFront(0, 1, 1, 0);
+      delay(_speed);
+      setStepFront(0, 0, 1, 0);
+      delay(_speed);
+      setStepFront(0, 0, 1, 1);
+      delay(_speed); 
+      setStepFront(0, 0, 0, 1);
+      delay(_speed);
+    }
+  }else{ // Stepper motor backward
+     for(int i=_step;i<0;i++){  
+      setStepFront(0, 0, 0, 1);
+      delay(_speed);
+      setStepFront(0, 0, 1, 1);
+      delay(_speed);
+      setStepFront(0, 0, 1, 0);
+      delay(_speed);
+      setStepFront(0, 1, 1, 0);
+      delay(_speed);
+      setStepFront(0, 1, 0, 0);
+      delay(_speed);
+      setStepFront(1, 1, 0, 0);
+      delay(_speed);
+      setStepFront(1, 0, 0, 0);
+      delay(_speed);
+      setStepFront(1, 0, 0, 1);
+      delay(_speed);
+    }
+   }
+}
+
+void step_back(int _step)//Stepper motor rotation
+{
+  if(_step>=0){  // Stepper motor forward
+    for(int i=0;i<_step;i++){   
+      setStepBack(1, 0, 0, 1);
+      delay(_speed); 
+      setStepBack(1, 0, 0, 0);
+      delay(_speed);
+      setStepBack(1, 1, 0, 0);
+      delay(_speed);
+      setStepBack(0, 1, 0, 0);
+      delay(_speed);
+      setStepBack(0, 1, 1, 0);
+      delay(_speed);
+      setStepBack(0, 0, 1, 0);
+      delay(_speed);
+      setStepBack(0, 0, 1, 1);
+      delay(_speed); 
+      setStepBack(0, 0, 0, 1);
+      delay(_speed);
+    }
+  }else{ // Stepper motor backward
+     for(int i=_step;i<0;i++){  
+      setStepBack(0, 0, 0, 1);
+      delay(_speed);
+      setStepBack(0, 0, 1, 1);
+      delay(_speed);
+      setStepBack(0, 0, 1, 0);
+      delay(_speed);
+      setStepBack(0, 1, 1, 0);
+      delay(_speed);
+      setStepBack(0, 1, 0, 0);
+      delay(_speed);
+      setStepBack(1, 1, 0, 0);
+      delay(_speed);
+      setStepBack(1, 0, 0, 0);
+      delay(_speed);
+      setStepBack(1, 0, 0, 1);
+      delay(_speed);
+    }
+   }
+}
+
+void step_ladle(int _step)//Stepper motor rotation
+{
+  if(_step>=0){  // Stepper motor forward
+    for(int i=0;i<_step;i++){   
+      setStepLadle(1, 0, 0, 1);
+      delay(_speed); 
+      setStepLadle(1, 0, 0, 0);
+      delay(_speed);
+      setStepLadle(1, 1, 0, 0);
+      delay(_speed);
+      setStepLadle(0, 1, 0, 0);
+      delay(_speed);
+      setStepLadle(0, 1, 1, 0);
+      delay(_speed);
+      setStepLadle(0, 0, 1, 0);
+      delay(_speed);
+      setStepLadle(0, 0, 1, 1);
+      delay(_speed); 
+      setStepLadle(0, 0, 0, 1);
+      delay(_speed);
+    }
+  }else{ // Stepper motor backward
+     for(int i=_step;i<0;i++){  
+      setStepLadle(0, 0, 0, 1);
+      delay(_speed);
+      setStepLadle(0, 0, 1, 1);
+      delay(_speed);
+      setStepLadle(0, 0, 1, 0);
+      delay(_speed);
+      setStepLadle(0, 1, 1, 0);
+      delay(_speed);
+      setStepLadle(0, 1, 0, 0);
+      delay(_speed);
+      setStepLadle(1, 1, 0, 0);
+      delay(_speed);
+      setStepLadle(1, 0, 0, 0);
+      delay(_speed);
+      setStepLadle(1, 0, 0, 1);
+      delay(_speed);
+    }
+   }
+}
+void setStepFront(int a, int b, int c, int d)  
+{  
+    digitalWrite(front_1, a);     
+    digitalWrite(front_2, b);     
+    digitalWrite(front_3, c);     
+    digitalWrite(front_4, d);     
+}  
+void setStepBack(int a, int b, int c, int d)  
+{  
+    digitalWrite(back_1, a);     
+    digitalWrite(back_2, b);     
+    digitalWrite(back_3, c);     
+    digitalWrite(back_4, d);     
+}  
+void setStepLadle(int a, int b, int c, int d)  
+{  
+    digitalWrite(ladle_1, a);     
+    digitalWrite(ladle_2, b);     
+    digitalWrite(ladle_3, c);     
+    digitalWrite(ladle_4, d);     
+}  
+
 void loop() {
   // put your main code here, to run repeatedly:
-  delay(1);
-  if(Serial.available() > 0)
-  {
-    data = Serial.read();
-    //rotateTable();
-
-    
-    if(data == 'a'){
-      rotateTable();
-      Serial.write('a');
-
-      
-    }else if(data == 'b'){
-      fillDumpling();
-      Serial.write('b');
-      
-
-    }
-    
+  while (Serial.available() == 0) {
+  
   }
+  int myNumber = Serial.parseInt();
+  switch(myNumber)
+  {
+    case 1:
+      clampDumpling();
+      break;
+    case 2:
+      moveLadle(-550)
+      break;
+
+
+  }  
 }
